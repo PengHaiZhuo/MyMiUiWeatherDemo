@@ -84,7 +84,7 @@ public class WaterMeterView extends View {
     private int unitYItem=5;
 
     /**
-     * Y方向Item个数
+     * Y方向有数据的Item个数
      */
     private int itemYSize;
 
@@ -96,10 +96,9 @@ public class WaterMeterView extends View {
     private int itemWidth;
 
     /**
-     * 控件的最低高度
-     * 默认7*itemWidth
+     * 控件期望高度
      */
-    private int minViewHeight;
+    private int expectViewHeight;
 
     private int viewWidth;
     private int viewHeight;
@@ -145,7 +144,6 @@ public class WaterMeterView extends View {
         defaultPadding = itemWidth = (int)UIUtil.dp2pxF(42);
         screenWidth = getResources().getDisplayMetrics().widthPixels;
         screenHeight = getResources().getDisplayMetrics().heightPixels;
-        minViewHeight=7*defaultPadding;
         //初始化画笔
         brokenLinePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         brokenLinePaint.setColor(colorBrokenLinePaint);
@@ -159,21 +157,21 @@ public class WaterMeterView extends View {
         textPaint.setColor(colorTextPaint);
         textPaint.setTextAlign(Paint.Align.CENTER);
         circlePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        calculateBrokenLineGap();
     }
 
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+        calculateItemYSize();
         int heightSize = MeasureSpec.getSize(heightMeasureSpec);
         int heightMode = MeasureSpec.getMode(heightMeasureSpec);
 
-        if (itemYSize<=5){
-            //确定高度
-            viewHeight=7*itemWidth;
-        }else {
-            viewHeight=(itemYSize+2)*itemWidth;
+        if (heightMode == MeasureSpec.EXACTLY) {
+            //特定大小，不管他多大
+            viewHeight = Math.max(heightSize, expectViewHeight);
+        } else {
+            viewHeight = expectViewHeight;
         }
 
         //确定宽度
@@ -195,7 +193,7 @@ public class WaterMeterView extends View {
     protected void onSizeChanged(int width, int height, int oldWidth, int oldHeight) {
         super.onSizeChanged(width, height, oldWidth, oldHeight);
         initDistance();
-        calculateBrokenLineGap();
+        calculateItemYSize();
     }
 
     /**
@@ -216,9 +214,9 @@ public class WaterMeterView extends View {
     }
 
     /**
-     * 计算折线单位高度差
+     * 计算Y方向有数据item有几个
      */
-    private void calculateBrokenLineGap() {
+    private void calculateItemYSize() {
         int lastMaxTem = -Integer.MAX_VALUE;
         int lastMinTem = Integer.MAX_VALUE;
         for (WaterAndElectricMeterDetail bean : list) {
@@ -233,7 +231,13 @@ public class WaterMeterView extends View {
             }
             //计算单位高度差
             unitVerticalGap = itemWidth/unitYItem;
-            itemYSize=  ((int)maxDosage/unitYItem+1);
+            itemYSize= (int) (Math.floor(Double.valueOf(maxDosage+"")/Double.valueOf(unitYItem+""))+1.00);
+            if (itemYSize<=5){
+                expectViewHeight=itemWidth*(7);
+            }else {
+                expectViewHeight=itemWidth*(itemYSize+2);
+            }
+
         }
     }
 
@@ -245,7 +249,6 @@ public class WaterMeterView extends View {
         screenHeight = getResources().getDisplayMetrics().heightPixels;
 
         defaultPadding = itemWidth = (int)UIUtil.dp2pxF(42);
-        minViewHeight = 7* itemWidth;
     }
 
 
@@ -273,7 +276,7 @@ public class WaterMeterView extends View {
         }
 
         //画Y轴
-        canvas.drawLine(itemWidth, viewHeight - itemWidth,viewWidth, viewHeight - itemWidth*(itemYSize+1), coordinatePaint);
+        canvas.drawLine(itemWidth, itemWidth,itemWidth, viewHeight - itemWidth, coordinatePaint);
         //写用量
         float centerXNew=itemWidth/2;
         float centerYNew;

@@ -1,0 +1,13 @@
+<resources>
+    <string name="app_name">MyMiUiWeatherDemo</string>
+
+    <!--天气列表-->
+    <string-array name="weatherData">
+        <item>晴</item>
+        <item>阴</item>
+        <item>多云</item>
+        <item>雨</item>
+        <item>雪</item>
+        <item>雷</item>
+    </string-array>
+</resources>

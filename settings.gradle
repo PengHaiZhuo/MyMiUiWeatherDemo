@@ -1,0 +1,2 @@
+rootProject.name='MyMiUiWeatherDemo'
+include ':app'

@@ -19,6 +19,7 @@ public class MainActivity extends AppCompatActivity {
     private List<WeatherBean> weatherBeanList;
 
     private MiUiWeatherView weatherView;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

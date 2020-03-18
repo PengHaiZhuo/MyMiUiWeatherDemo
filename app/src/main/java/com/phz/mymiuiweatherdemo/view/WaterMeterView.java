@@ -3,12 +3,18 @@ package com.phz.mymiuiweatherdemo.view;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.LinearGradient;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.PointF;
 import android.graphics.RectF;
+import android.graphics.Shader;
 import android.util.AttributeSet;
+import android.view.MotionEvent;
+import android.view.VelocityTracker;
 import android.view.View;
+import android.view.ViewConfiguration;
+import android.widget.Scroller;
 
 import com.phz.mymiuiweatherdemo.MyApplication;
 import com.phz.mymiuiweatherdemo.R;
@@ -145,6 +151,21 @@ public class WaterMeterView extends View {
     private List<PointF> pointFList=new ArrayList<>();
 
 
+    /**
+     * 速度追踪器
+     */
+    private VelocityTracker velocityTracker;
+
+    /**
+     * 关于UI的标准常量
+     */
+    private ViewConfiguration viewConfiguration;
+
+    /**
+     * Scroller
+     */
+    private Scroller scroller;
+
     public WaterMeterView(Context context) {
         this(context,null);
     }
@@ -172,7 +193,7 @@ public class WaterMeterView extends View {
         brokenLinePaint.setStyle(Paint.Style.STROKE);
         coordinatePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         coordinatePaint.setColor(colorCoordinatePaint);
-        coordinatePaint.setStrokeWidth(UIUtil.dp2pxF(1f));
+        coordinatePaint.setStrokeWidth(UIUtil.dp2pxF(0.5f));
         textPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         textPaint.setTextSize(textSize);
         textPaint.setColor(colorTextPaint);
@@ -181,8 +202,68 @@ public class WaterMeterView extends View {
         backGroundPaint=new Paint(Paint.ANTI_ALIAS_FLAG);
         curvePath=new Path();
         rectF=new RectF();
+
+        viewConfiguration=ViewConfiguration.get(context);
+        scroller=new Scroller(context);
     }
 
+    private float x,lastX;
+
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        if (velocityTracker==null){
+            velocityTracker=VelocityTracker.obtain();
+        }
+        velocityTracker.addMovement(event);
+        switch (event.getAction()){
+            case MotionEvent.ACTION_DOWN:
+                if (!scroller.isFinished()){
+                    //没结束，手动让他结束
+                    scroller.abortAnimation();
+                }
+                lastX = x =event.getX();
+                return true;
+            case MotionEvent.ACTION_MOVE:
+                x=event.getX();
+                int deltaX = (int) (lastX - x);
+                //越界恢复
+                if (getScrollX() + deltaX < 0) {
+                    scrollTo(0, 0);
+                    return true;
+                } else if (getScrollX() + deltaX > viewWidth - screenWidth) {
+                    scrollTo(viewWidth - screenWidth, 0);
+                    return true;
+                }
+                scrollBy(deltaX, 0);
+                lastX = x;
+                break;
+            case MotionEvent.ACTION_UP:
+                x = event.getX();
+                //计算1秒内滑动过多少像素
+                velocityTracker.computeCurrentVelocity(1000);
+                int xVelocity = (int) velocityTracker.getXVelocity();
+                if (Math.abs(xVelocity) > viewConfiguration.getScaledMinimumFlingVelocity()) {
+                    //滑动速度可被判定为抛动
+                    //根据挥动手势开始滚动。 行驶的距离将取决于猛击的初始速度。
+                    scroller.fling(getScrollX(), 0, -xVelocity, 0, 0, viewWidth - screenWidth, 0, 0);
+                    invalidate();
+                }
+                break;
+        }
+
+        return super.onTouchEvent(event);
+    }
+
+
+    @Override
+    public void computeScroll() {
+        super.computeScroll();
+        if (scroller.computeScrollOffset()) {
+            //动画尚未完成
+            scrollTo(scroller.getCurrX(), scroller.getCurrY());
+            invalidate();
+        }
+    }
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
@@ -200,7 +281,7 @@ public class WaterMeterView extends View {
         //确定宽度
         int totalWidth = 0;
         if (list.size() > 1) {
-            totalWidth = defaultPadding + itemWidth * (list.size() - 1);
+            totalWidth = defaultPadding + itemWidth * (list.size() - 1)+defaultPadding;
         }
         viewWidth = Math.max(screenWidth, totalWidth);
 
@@ -215,6 +296,7 @@ public class WaterMeterView extends View {
         super.onSizeChanged(width, height, oldWidth, oldHeight);
         initDistance();
         calculateItemYSize();
+        initPointFData();
     }
 
     /**
@@ -289,20 +371,37 @@ public class WaterMeterView extends View {
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
+        //画渐变蓝色背景
+        drawBackBlue(canvas);
         //画坐标
         drawAxis(canvas);
         //画曲线
         drawCurve(canvas);
-        //画渐变蓝色背景
-        drawBackBlue();
     }
 
     /**
      * 画渐变蓝色背景
      */
-    private void drawBackBlue() {
+    private void drawBackBlue(Canvas canvas) {
+        canvas.save();
+        //遍历一遍点集合，找到用量最大的点的坐标
+        PointF pointFMaxCurve;
+        pointFMaxCurve=pointFList.get(0);
+        for (PointF p:pointFList) {
+                if (p.y<pointFMaxCurve.y){
+                    pointFMaxCurve=p;
+                }
+        }
+
         //设置抗锯齿
         backGroundPaint.setAntiAlias(true);
+        //为Paint设置渐变
+        LinearGradient linearGradient=new LinearGradient(pointFMaxCurve.x,pointFMaxCurve.y,pointFList.get(0).x,viewHeight-itemWidth,new int[]{
+                0xFFE1F1FF,0xFFEFF7FF,0xFFFAFCFF},
+                null, Shader.TileMode.CLAMP);
+        backGroundPaint.setShader(linearGradient);
+        canvas.drawPath(getCurveAndAliasPath(),backGroundPaint);
+        canvas.restore();
     }
 
     /**
@@ -337,7 +436,7 @@ public class WaterMeterView extends View {
             //画横轴
             for (int i = 0; i <itemYSize+1; i++) {
                 canvas.drawLine(itemWidth, viewHeight - itemWidth-i*itemWidth,
-                        viewWidth, viewHeight - itemWidth-i*itemWidth, coordinatePaint);
+                        viewWidth-UIUtil.dp2px(10), viewHeight - itemWidth-i*itemWidth, coordinatePaint);
             }
 
         //写月份

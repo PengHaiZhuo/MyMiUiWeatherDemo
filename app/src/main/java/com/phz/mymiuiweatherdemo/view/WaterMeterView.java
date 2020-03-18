@@ -150,6 +150,10 @@ public class WaterMeterView extends View {
      */
     private List<PointF> pointFList=new ArrayList<>();
 
+    /**
+     * 选中的那个点
+     */
+    private PointF pointFSelected=null;
 
     /**
      * 速度追踪器
@@ -207,8 +211,8 @@ public class WaterMeterView extends View {
         scroller=new Scroller(context);
     }
 
-    private float x,lastX;
-
+    private float x,downX;
+    private float downY;
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         if (velocityTracker==null){
@@ -221,11 +225,11 @@ public class WaterMeterView extends View {
                     //没结束，手动让他结束
                     scroller.abortAnimation();
                 }
-                lastX = x =event.getX();
+                downX = x =event.getX();
                 return true;
             case MotionEvent.ACTION_MOVE:
                 x=event.getX();
-                int deltaX = (int) (lastX - x);
+                int deltaX = (int) (downX - x);
                 //越界恢复
                 if (getScrollX() + deltaX < 0) {
                     scrollTo(0, 0);
@@ -235,7 +239,6 @@ public class WaterMeterView extends View {
                     return true;
                 }
                 scrollBy(deltaX, 0);
-                lastX = x;
                 break;
             case MotionEvent.ACTION_UP:
                 x = event.getX();
@@ -247,6 +250,19 @@ public class WaterMeterView extends View {
                     //根据挥动手势开始滚动。 行驶的距离将取决于猛击的初始速度。
                     scroller.fling(getScrollX(), 0, -xVelocity, 0, 0, viewWidth - screenWidth, 0, 0);
                     invalidate();
+                }else {
+                    //todo 是点击就判断pointFList中是否有满足范围的，有就invalidate
+                    //偏移量
+                    float tX= getTranslationX();
+                    for (int i = 0; i <pointFList.size() ; i++) {
+                        if (Math.abs(downX-(pointFList.get(i).x-tX))<UIUtil.dp2pxF(21)&&Math.abs(downY-pointFList.get(i).y)<UIUtil.dp2pxF(21)){
+                            pointFSelected=pointFList.get(i);
+                            invalidate();
+                        }else {
+                            pointFSelected=null;
+                            invalidate();
+                        }
+                    }
                 }
                 break;
         }
@@ -377,6 +393,11 @@ public class WaterMeterView extends View {
         drawAxis(canvas);
         //画曲线
         drawCurve(canvas);
+        //画虚线
+
+        //画小圆点
+
+        //画水表详情框
     }
 
     /**

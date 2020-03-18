@@ -30,18 +30,18 @@ public class WaterMeterActivity extends AppCompatActivity {
 
     private void initData() {
         list=new ArrayList<>();
-        list.add(new WaterAndElectricMeterDetail("","","5","","","","",""));
-        list.add(new WaterAndElectricMeterDetail("","","10","","","","",""));
-        list.add(new WaterAndElectricMeterDetail("","","15","","","","",""));
-        list.add(new WaterAndElectricMeterDetail("","","20","","","","",""));
-        list.add(new WaterAndElectricMeterDetail("","","25","","","","",""));
-        list.add(new WaterAndElectricMeterDetail("","","15","","","","",""));
-        list.add(new WaterAndElectricMeterDetail("","","10","","","","",""));
-        list.add(new WaterAndElectricMeterDetail("","","20","","","","",""));
-        list.add(new WaterAndElectricMeterDetail("","","23","","","","",""));
-        list.add(new WaterAndElectricMeterDetail("","","26","","","","",""));
-        list.add(new WaterAndElectricMeterDetail("","","18","","","","",""));
-        list.add(new WaterAndElectricMeterDetail("","","16","","","","",""));
+        list.add(new WaterAndElectricMeterDetail("","","5","","1","","",""));
+        list.add(new WaterAndElectricMeterDetail("","","10","","2","","",""));
+        list.add(new WaterAndElectricMeterDetail("","","15","","3","","",""));
+        list.add(new WaterAndElectricMeterDetail("","","20","","4","","",""));
+        list.add(new WaterAndElectricMeterDetail("","","25","","5","","",""));
+        list.add(new WaterAndElectricMeterDetail("","","15","","6","","",""));
+        list.add(new WaterAndElectricMeterDetail("","","10","","7","","",""));
+        list.add(new WaterAndElectricMeterDetail("","","20","","8","","",""));
+        list.add(new WaterAndElectricMeterDetail("","","23","","9","","",""));
+        list.add(new WaterAndElectricMeterDetail("","","26","","10","","",""));
+        list.add(new WaterAndElectricMeterDetail("","","18","","11","","",""));
+        list.add(new WaterAndElectricMeterDetail("","","16","","12","","",""));
         waterMeterView.setData(list);
     }
 }

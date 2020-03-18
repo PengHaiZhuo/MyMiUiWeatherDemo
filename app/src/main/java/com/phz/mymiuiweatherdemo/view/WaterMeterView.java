@@ -4,10 +4,14 @@ import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.Path;
 import android.graphics.PointF;
+import android.graphics.RectF;
 import android.util.AttributeSet;
 import android.view.View;
 
+import com.phz.mymiuiweatherdemo.MyApplication;
+import com.phz.mymiuiweatherdemo.R;
 import com.phz.mymiuiweatherdemo.bean.WaterAndElectricMeterDetail;
 import com.phz.mymiuiweatherdemo.util.UIUtil;
 
@@ -41,6 +45,11 @@ public class WaterMeterView extends View {
      * 文字画笔
      */
     private Paint textPaint;
+
+    /**
+     * 渐变背景画笔
+     */
+    private Paint backGroundPaint;
 
     /**
      * 背景颜色
@@ -104,7 +113,17 @@ public class WaterMeterView extends View {
     private int viewHeight;
     private int screenWidth;
     private int screenHeight;
-    
+
+    /**
+     * 曲线路径
+     */
+    private Path curvePath;
+
+    /**
+     * 计算区域，点击范围
+     */
+    private RectF rectF;
+
     /**
      * 最多用量
      */
@@ -144,6 +163,8 @@ public class WaterMeterView extends View {
         defaultPadding = itemWidth = (int)UIUtil.dp2pxF(42);
         screenWidth = getResources().getDisplayMetrics().widthPixels;
         screenHeight = getResources().getDisplayMetrics().heightPixels;
+        //计算单位高度差
+        unitVerticalGap = itemWidth/unitYItem;
         //初始化画笔
         brokenLinePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         brokenLinePaint.setColor(colorBrokenLinePaint);
@@ -157,13 +178,15 @@ public class WaterMeterView extends View {
         textPaint.setColor(colorTextPaint);
         textPaint.setTextAlign(Paint.Align.CENTER);
         circlePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        backGroundPaint=new Paint(Paint.ANTI_ALIAS_FLAG);
+        curvePath=new Path();
+        rectF=new RectF();
     }
 
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
-        calculateItemYSize();
         int heightSize = MeasureSpec.getSize(heightMeasureSpec);
         int heightMode = MeasureSpec.getMode(heightMeasureSpec);
 
@@ -180,13 +203,11 @@ public class WaterMeterView extends View {
             totalWidth = defaultPadding + itemWidth * (list.size() - 1);
         }
         viewWidth = Math.max(screenWidth, totalWidth);
-    }
 
-    @Override
-    protected void onDraw(Canvas canvas) {
-        super.onDraw(canvas);
-        //画坐标
-        drawAxis(canvas);
+        //计算
+        calculateItemYSize();
+        //获取数据点集
+        initPointFData();
     }
 
     @Override
@@ -214,6 +235,22 @@ public class WaterMeterView extends View {
     }
 
     /**
+     * 获取数据点集
+     */
+    private void initPointFData() {
+        float centerX;
+        float centerY;
+        pointFList.clear();
+        for (int i = 0; i <list.size() ; i++) {
+            float dosage=Float.valueOf(list.get(i).getDosage());
+            centerY=viewHeight-itemWidth-unitVerticalGap*dosage;
+            centerX=itemWidth+itemWidth*i;
+            pointFList.add(new PointF(centerX,centerY));
+        }
+
+    }
+
+    /**
      * 计算Y方向有数据item有几个
      */
     private void calculateItemYSize() {
@@ -229,15 +266,12 @@ public class WaterMeterView extends View {
                 minDosage = dosage;
                 lastMinTem = dosage;
             }
-            //计算单位高度差
-            unitVerticalGap = itemWidth/unitYItem;
             itemYSize= (int) (Math.floor(Double.valueOf(maxDosage+"")/Double.valueOf(unitYItem+""))+1.00);
             if (itemYSize<=5){
                 expectViewHeight=itemWidth*(7);
             }else {
                 expectViewHeight=itemWidth*(itemYSize+2);
             }
-
         }
     }
 
@@ -252,8 +286,49 @@ public class WaterMeterView extends View {
     }
 
 
+    @Override
+    protected void onDraw(Canvas canvas) {
+        super.onDraw(canvas);
+        //画坐标
+        drawAxis(canvas);
+        //画曲线
+        drawCurve(canvas);
+        //画渐变蓝色背景
+        drawBackBlue();
+    }
+
     /**
-     * 花轴线
+     * 画渐变蓝色背景
+     */
+    private void drawBackBlue() {
+        //设置抗锯齿
+        backGroundPaint.setAntiAlias(true);
+    }
+
+    /**
+     * 画曲线
+     * @param canvas
+     */
+    private void drawCurve(Canvas canvas) {
+        canvas.save();
+        curvePath.reset();
+
+        for (int i = 0; i <pointFList.size() ; i++) {
+            if (i==0){
+                curvePath.moveTo(pointFList.get(i).x,pointFList.get(i).y);
+            }
+            if (i!=pointFList.size()-1){
+                curvePath.cubicTo((pointFList.get(i).x+pointFList.get(i+1).x)/2,pointFList.get(i).y,
+                        (pointFList.get(i).x+pointFList.get(i+1).x)/2,pointFList.get(i+1).y,
+                        pointFList.get(i+1).x,pointFList.get(i+1).y);
+            }
+        }
+        canvas.drawPath(curvePath,brokenLinePaint);
+        canvas.restore();
+    }
+
+    /**
+     * 画轴线
      *
      * @param canvas
      */
@@ -269,7 +344,7 @@ public class WaterMeterView extends View {
         float centerX;
         float centerY = viewHeight - defaultPadding + UIUtil.dp2pxF(15f);
         for (int i = 0; i < list.size(); i++) {
-            String text = i+"月";
+            String text = list.get(i).getMonth()+"月";
             centerX = defaultPadding + i * itemWidth;
             Paint.FontMetrics m = textPaint.getFontMetrics();
             canvas.drawText(text, 0, text.length(), centerX, centerY - (m.ascent + m.descent) / 2, textPaint);
@@ -287,7 +362,34 @@ public class WaterMeterView extends View {
             canvas.drawText(text, 0, text.length(), centerXNew, centerYNew - (m.ascent + m.descent) / 2, textPaint);
         }
 
+        String string= MyApplication.getInstance().getResources().getString(R.string.dosage);
+        Paint.FontMetrics m = textPaint.getFontMetrics();
+        canvas.drawText(string, 0, string.length(), centerXNew, itemWidth/2 - (m.ascent + m.descent) / 2, textPaint);
+
         canvas.restore();
+    }
+
+    /**
+     * 获取曲线图路径（曲线+x轴+2竖线）
+     * @return
+     */
+    private Path getCurveAndAliasPath(){
+        curvePath.reset();
+        for (int i = 0; i <pointFList.size() ; i++) {
+            if (i==0){
+                curvePath.moveTo(pointFList.get(i).x,pointFList.get(i).y);
+            }
+            if (i!=pointFList.size()-1){
+                curvePath.cubicTo((pointFList.get(i).x+pointFList.get(i+1).x)/2,pointFList.get(i).y,
+                        (pointFList.get(i).x+pointFList.get(i+1).x)/2,pointFList.get(i+1).y,
+                        pointFList.get(i+1).x,pointFList.get(i+1).y);
+            }else {
+                curvePath.lineTo(pointFList.get(i).x,viewHeight-itemWidth);
+                curvePath.lineTo(pointFList.get(0).x,viewHeight-itemWidth);
+                curvePath.close();
+            }
+        }
+        return curvePath;
     }
 
 }

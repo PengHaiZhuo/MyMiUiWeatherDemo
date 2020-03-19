@@ -13,7 +13,6 @@ import androidx.appcompat.app.AppCompatActivity;
 
 /**
  * @author haizhuo
- * @introduction
  */
 public class WaterMeterActivity extends AppCompatActivity {
     private WaterMeterView waterMeterView;
@@ -30,7 +29,7 @@ public class WaterMeterActivity extends AppCompatActivity {
 
     private void initData() {
         list=new ArrayList<>();
-        list.add(new WaterAndElectricMeterDetail("","333","5","","1","2677","",""));
+        list.add(new WaterAndElectricMeterDetail("","333","29","","1","2677","",""));
         list.add(new WaterAndElectricMeterDetail("","333","10","","2","2687","",""));
         list.add(new WaterAndElectricMeterDetail("","333","15","","3","2702","",""));
         list.add(new WaterAndElectricMeterDetail("","333","20","","4","2727","",""));

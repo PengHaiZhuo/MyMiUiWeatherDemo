@@ -24,6 +24,7 @@ import com.phz.mymiuiweatherdemo.bean.WaterAndElectricMeterDetail;
 import com.phz.mymiuiweatherdemo.util.UIUtil;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 
 import androidx.annotation.Nullable;
@@ -118,8 +119,9 @@ public class WaterMeterView extends View {
 
     /**
      * Y方向有数据的Item个数
+     * 默认5个
      */
-    private int itemYSize;
+    private int itemYSize=5;
 
     /**
      * 折线图左和下的间距，同横纵单位间隔
@@ -130,6 +132,7 @@ public class WaterMeterView extends View {
 
     /**
      * 控件期望高度
+     * 默认为7个itemWidth
      */
     private int expectViewHeight;
 
@@ -216,10 +219,12 @@ public class WaterMeterView extends View {
         pointRadius=UIUtil.dp2pxF(2.5f);
         setBackgroundColor(backGroundColor);
         defaultPadding = itemWidth = (int)UIUtil.dp2pxF(42);
+        //期望高度默认值为7个itemWidth，（itemYSize默认值+2）
+        expectViewHeight=itemWidth*(7);
         screenWidth = getResources().getDisplayMetrics().widthPixels;
         screenHeight = getResources().getDisplayMetrics().heightPixels;
         //计算单位高度差
-        unitVerticalGap = itemWidth/unitYItem;
+        unitVerticalGap = (float) (itemWidth/unitYItem);
         //初始化画笔
         brokenLinePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         brokenLinePaint.setColor(colorBrokenLinePaint);
@@ -248,6 +253,11 @@ public class WaterMeterView extends View {
 
         viewConfiguration=ViewConfiguration.get(context);
         scroller=new Scroller(context);
+    }
+
+    @Override
+    public boolean performClick() {
+        return super.performClick();
     }
 
     private float x,downX;
@@ -334,10 +344,8 @@ public class WaterMeterView extends View {
         }
 
         //确定宽度
-        int totalWidth = 0;
-        if (list.size() > 1) {
-            totalWidth = defaultPadding + itemWidth * (list.size() - 1)+defaultPadding;
-        }
+        int totalWidth;
+        totalWidth=itemWidth*13;
         viewWidth = Math.max(screenWidth, totalWidth);
 
         //获取数据点集
@@ -354,18 +362,18 @@ public class WaterMeterView extends View {
 
     /**
      * 公开方法，用于设置元数据
-     *
-     * @param data
      */
     public void setData(List<WaterAndElectricMeterDetail> data) {
-        if (data == null || data.size() < 2) {
+        if (data == null) {
             return;
         }
         //数据清理
         list.clear();
         pointFList.clear();
+        pointFSelected=null;
 
         this.list = data;
+        initPointFData();
         invalidate();
     }
 
@@ -438,7 +446,6 @@ public class WaterMeterView extends View {
 
     /**
      * 画水表详情框
-     * @param canvas
      */
     private void drawWaterDetailsText(Canvas canvas) {
         canvas.save();
@@ -458,7 +465,7 @@ public class WaterMeterView extends View {
 
         //写文字
         WaterAndElectricMeterDetail weData=list.get(pointFList.indexOf(pointFSelected));
-        String text = "用量："+weData.getDosage()+"\t"+"读数："+weData.getTotalReading()+"\t"+"修正读数："+weData.getCorrection();
+        String text = "用量："+weData.getDosage()+"    "+"读数："+weData.getTotalReading()+"    "+"修正读数："+weData.getCorrection();
         Paint.FontMetrics m = textPaint.getFontMetrics();
         canvas.drawText(text, 0, text.length(), rectF.left+UIUtil.dp2pxF(115), UIUtil.dp2pxF(21) - (m.ascent + m.descent) / 2, textPaintDetail);
 
@@ -467,7 +474,6 @@ public class WaterMeterView extends View {
 
     /**
      * 画小圆点和虚线
-     * @param canvas
      */
     private void drawPointsAndLine(Canvas canvas) {
         canvas.save();
@@ -503,14 +509,17 @@ public class WaterMeterView extends View {
      * 画渐变蓝色背景
      */
     private void drawBackBlue(Canvas canvas) {
+        if (list.isEmpty()||pointFList.isEmpty()){
+            return;
+        }
         canvas.save();
         //遍历一遍点集合，找到用量最大的点的坐标
         PointF pointFMaxCurve;
         pointFMaxCurve=pointFList.get(0);
         for (PointF p:pointFList) {
-                if (p.y<pointFMaxCurve.y){
-                    pointFMaxCurve=p;
-                }
+            if (p.y<pointFMaxCurve.y){
+                pointFMaxCurve=p;
+            }
         }
 
         //设置抗锯齿
@@ -526,9 +535,11 @@ public class WaterMeterView extends View {
 
     /**
      * 画曲线
-     * @param canvas
      */
     private void drawCurve(Canvas canvas) {
+        if (list.isEmpty()||pointFList.isEmpty()){
+            return;
+        }
         canvas.save();
         curvePath.reset();
 
@@ -548,22 +559,20 @@ public class WaterMeterView extends View {
 
     /**
      * 画轴线
-     *
-     * @param canvas
      */
     private void drawAxis(Canvas canvas) {
         canvas.save();
-            //画横轴
-            for (int i = 0; i <itemYSize+1; i++) {
-                canvas.drawLine(itemWidth, viewHeight - itemWidth-i*itemWidth,
-                        viewWidth-UIUtil.dp2px(10), viewHeight - itemWidth-i*itemWidth, coordinatePaint);
-            }
+        //画横轴
+        for (int i = 0; i <itemYSize+1; i++) {
+            canvas.drawLine(itemWidth, viewHeight - itemWidth-i*itemWidth,
+                    viewWidth-UIUtil.dp2px(10), viewHeight - itemWidth-i*itemWidth, coordinatePaint);
+        }
 
         //写月份
         float centerX;
         float centerY = viewHeight - defaultPadding + UIUtil.dp2pxF(15f);
-        for (int i = 0; i < list.size(); i++) {
-            String text = list.get(i).getMonth()+"月";
+        for (int i = 0; i < Calendar.UNDECIMBER; i++) {
+            String text = (i+1)+"月";
             centerX = defaultPadding + i * itemWidth;
             Paint.FontMetrics m = textPaint.getFontMetrics();
             canvas.drawText(text, 0, text.length(), centerX, centerY - (m.ascent + m.descent) / 2, textPaint);
@@ -590,7 +599,7 @@ public class WaterMeterView extends View {
 
     /**
      * 获取曲线图路径（曲线+x轴+2竖线）
-     * @return
+     * @return 闭合曲线图路径
      */
     private Path getCurveAndAliasPath(){
         curvePath.reset();
@@ -612,3 +621,4 @@ public class WaterMeterView extends View {
     }
 
 }
+

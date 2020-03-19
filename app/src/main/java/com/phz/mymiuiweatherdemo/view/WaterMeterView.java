@@ -50,14 +50,24 @@ public class WaterMeterView extends View {
     private Paint circlePaint;
 
     /**
-     * 文字画笔
+     * 文字画笔（x、y轴）
      */
     private Paint textPaint;
+
+    /**
+     * 文字画笔（水表详情）
+     */
+    private Paint textPaintDetail;
 
     /**
      * 渐变背景画笔
      */
     private Paint backGroundPaint;
+
+    /**
+     * 详情背景画笔
+     */
+    private Paint backGroundDetailPaint;
 
     /**
      * 背景颜色
@@ -87,6 +97,12 @@ public class WaterMeterView extends View {
      * 默认11sp
      */
     private float textSize;
+
+    /**
+     * 水表详情文字大小
+     * 默认10sp
+     */
+    private float textSizeDetail;
 
     /**
      * 单位高度差
@@ -133,7 +149,12 @@ public class WaterMeterView extends View {
     private Path curvePath;
 
     /**
-     * 计算区域，点击范围
+     * 水表详情背景路径
+     */
+    private Path WaterDetailBgPath;
+
+    /**
+     * 水表详情背景图范围
      */
     private RectF rectF;
 
@@ -191,6 +212,7 @@ public class WaterMeterView extends View {
         setLayerType(LAYER_TYPE_SOFTWARE, null);
         //设置一些默认值
         textSize= UIUtil.dp2pxF(11);
+        textSizeDetail=UIUtil.dp2pxF(10);
         pointRadius=UIUtil.dp2pxF(2.5f);
         setBackgroundColor(backGroundColor);
         defaultPadding = itemWidth = (int)UIUtil.dp2pxF(42);
@@ -210,10 +232,18 @@ public class WaterMeterView extends View {
         textPaint.setTextSize(textSize);
         textPaint.setColor(colorTextPaint);
         textPaint.setTextAlign(Paint.Align.CENTER);
+        textPaintDetail= new Paint(Paint.ANTI_ALIAS_FLAG);
+        textPaintDetail.setTextSize(textSizeDetail);
+        textPaintDetail.setColor(backGroundColor);
+        textPaintDetail.setTextAlign(Paint.Align.CENTER);
+
         circlePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         coordinatePaint.setStrokeWidth(UIUtil.dp2pxF(0.5f));
         backGroundPaint=new Paint(Paint.ANTI_ALIAS_FLAG);
+        backGroundDetailPaint=new Paint(Paint.ANTI_ALIAS_FLAG);
+        backGroundDetailPaint.setColor(colorTextPaint);
         curvePath=new Path();
+        WaterDetailBgPath=new Path();
         rectF=new RectF();
 
         viewConfiguration=ViewConfiguration.get(context);
@@ -294,7 +324,8 @@ public class WaterMeterView extends View {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
         int heightSize = MeasureSpec.getSize(heightMeasureSpec);
         int heightMode = MeasureSpec.getMode(heightMeasureSpec);
-
+        //计算
+        calculateItemYSize();
         if (heightMode == MeasureSpec.EXACTLY) {
             //特定大小，不管他多大
             viewHeight = Math.max(heightSize, expectViewHeight);
@@ -309,8 +340,6 @@ public class WaterMeterView extends View {
         }
         viewWidth = Math.max(screenWidth, totalWidth);
 
-        //计算
-        calculateItemYSize();
         //获取数据点集
         initPointFData();
     }
@@ -412,9 +441,28 @@ public class WaterMeterView extends View {
      * @param canvas
      */
     private void drawWaterDetailsText(Canvas canvas) {
+        canvas.save();
+        WaterDetailBgPath.reset();
         if (pointFSelected==null){
             return;
         }
+        rectF.left = screenWidth/2-UIUtil.dp2pxF(115)+getScrollX();
+        rectF.right =screenWidth/2+UIUtil.dp2pxF(115)+getScrollX();
+        rectF.top = UIUtil.dp2pxF(6);
+        rectF.bottom=UIUtil.dp2pxF(36);
+        WaterDetailBgPath.moveTo(rectF.left,rectF.top);
+        WaterDetailBgPath.addRoundRect(rectF,UIUtil.dp2pxF(5),UIUtil.dp2pxF(5), Path.Direction.CW);
+
+        //画背景
+        canvas.drawPath(WaterDetailBgPath,backGroundDetailPaint);
+
+        //写文字
+        WaterAndElectricMeterDetail weData=list.get(pointFList.indexOf(pointFSelected));
+        String text = "用量："+weData.getDosage()+"\t"+"读数："+weData.getTotalReading()+"\t"+"修正读数："+weData.getCorrection();
+        Paint.FontMetrics m = textPaint.getFontMetrics();
+        canvas.drawText(text, 0, text.length(), rectF.left+UIUtil.dp2pxF(115), UIUtil.dp2pxF(21) - (m.ascent + m.descent) / 2, textPaintDetail);
+
+        canvas.restore();
     }
 
     /**

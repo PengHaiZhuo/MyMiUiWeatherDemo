@@ -30,18 +30,18 @@ public class WaterMeterActivity extends AppCompatActivity {
 
     private void initData() {
         list=new ArrayList<>();
-        list.add(new WaterAndElectricMeterDetail("","","5","","1","","",""));
-        list.add(new WaterAndElectricMeterDetail("","","10","","2","","",""));
-        list.add(new WaterAndElectricMeterDetail("","","15","","3","","",""));
-        list.add(new WaterAndElectricMeterDetail("","","20","","4","","",""));
-        list.add(new WaterAndElectricMeterDetail("","","25","","5","","",""));
-        list.add(new WaterAndElectricMeterDetail("","","15","","6","","",""));
-        list.add(new WaterAndElectricMeterDetail("","","10","","7","","",""));
-        list.add(new WaterAndElectricMeterDetail("","","20","","8","","",""));
-        list.add(new WaterAndElectricMeterDetail("","","23","","9","","",""));
-        list.add(new WaterAndElectricMeterDetail("","","26","","10","","",""));
-        list.add(new WaterAndElectricMeterDetail("","","18","","11","","",""));
-        list.add(new WaterAndElectricMeterDetail("","","16","","12","","",""));
+        list.add(new WaterAndElectricMeterDetail("","333","5","","1","2677","",""));
+        list.add(new WaterAndElectricMeterDetail("","333","10","","2","2687","",""));
+        list.add(new WaterAndElectricMeterDetail("","333","15","","3","2702","",""));
+        list.add(new WaterAndElectricMeterDetail("","333","20","","4","2727","",""));
+        list.add(new WaterAndElectricMeterDetail("","333","25","","5","2727","",""));
+        list.add(new WaterAndElectricMeterDetail("","333","15","","6","2727","",""));
+        list.add(new WaterAndElectricMeterDetail("","333","10","","7","2727","",""));
+        list.add(new WaterAndElectricMeterDetail("","333","20","","8","2727","",""));
+        list.add(new WaterAndElectricMeterDetail("","333","23","","9","2727","",""));
+        list.add(new WaterAndElectricMeterDetail("","333","26","","10","2727","",""));
+        list.add(new WaterAndElectricMeterDetail("","333","18","","11","2727","",""));
+        list.add(new WaterAndElectricMeterDetail("","333","16","","12","2727","",""));
         waterMeterView.setData(list);
     }
 }

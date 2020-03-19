@@ -3,9 +3,11 @@ package com.phz.mymiuiweatherdemo.view;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.DashPathEffect;
 import android.graphics.LinearGradient;
 import android.graphics.Paint;
 import android.graphics.Path;
+import android.graphics.PathEffect;
 import android.graphics.PointF;
 import android.graphics.RectF;
 import android.graphics.Shader;
@@ -115,6 +117,11 @@ public class WaterMeterView extends View {
      */
     private int expectViewHeight;
 
+    /**
+     * 折线点的半径(默认2.5dp的像素)
+     */
+    private float pointRadius;
+
     private int viewWidth;
     private int viewHeight;
     private int screenWidth;
@@ -184,6 +191,7 @@ public class WaterMeterView extends View {
         setLayerType(LAYER_TYPE_SOFTWARE, null);
         //设置一些默认值
         textSize= UIUtil.dp2pxF(11);
+        pointRadius=UIUtil.dp2pxF(2.5f);
         setBackgroundColor(backGroundColor);
         defaultPadding = itemWidth = (int)UIUtil.dp2pxF(42);
         screenWidth = getResources().getDisplayMetrics().widthPixels;
@@ -203,6 +211,7 @@ public class WaterMeterView extends View {
         textPaint.setColor(colorTextPaint);
         textPaint.setTextAlign(Paint.Align.CENTER);
         circlePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        coordinatePaint.setStrokeWidth(UIUtil.dp2pxF(0.5f));
         backGroundPaint=new Paint(Paint.ANTI_ALIAS_FLAG);
         curvePath=new Path();
         rectF=new RectF();
@@ -226,6 +235,7 @@ public class WaterMeterView extends View {
                     scroller.abortAnimation();
                 }
                 downX = x =event.getX();
+                downY =event.getY();
                 return true;
             case MotionEvent.ACTION_MOVE:
                 x=event.getX();
@@ -251,16 +261,14 @@ public class WaterMeterView extends View {
                     scroller.fling(getScrollX(), 0, -xVelocity, 0, 0, viewWidth - screenWidth, 0, 0);
                     invalidate();
                 }else {
-                    //todo 是点击就判断pointFList中是否有满足范围的，有就invalidate
+                    //判断点击pointFList中是否有满足范围的，有就invalidate
                     //偏移量
-                    float tX= getTranslationX();
+                    float tX= getScrollX();
                     for (int i = 0; i <pointFList.size() ; i++) {
                         if (Math.abs(downX-(pointFList.get(i).x-tX))<UIUtil.dp2pxF(21)&&Math.abs(downY-pointFList.get(i).y)<UIUtil.dp2pxF(21)){
                             pointFSelected=pointFList.get(i);
                             invalidate();
-                        }else {
-                            pointFSelected=null;
-                            invalidate();
+                            break;
                         }
                     }
                 }
@@ -393,11 +401,54 @@ public class WaterMeterView extends View {
         drawAxis(canvas);
         //画曲线
         drawCurve(canvas);
-        //画虚线
-
-        //画小圆点
-
+        //画小圆点和虚线
+        drawPointsAndLine(canvas);
         //画水表详情框
+        drawWaterDetailsText(canvas);
+    }
+
+    /**
+     * 画水表详情框
+     * @param canvas
+     */
+    private void drawWaterDetailsText(Canvas canvas) {
+        if (pointFSelected==null){
+            return;
+        }
+    }
+
+    /**
+     * 画小圆点和虚线
+     * @param canvas
+     */
+    private void drawPointsAndLine(Canvas canvas) {
+        canvas.save();
+        circlePaint.reset();
+        if (pointFSelected==null){
+            return;
+        }
+        //画圆
+        float x_point = pointFSelected.x;
+        float y_point = pointFSelected.y;
+        //用背景色在拐点处画实心圆
+        circlePaint.setStyle(Paint.Style.FILL_AND_STROKE);
+        circlePaint.setColor(backGroundColor);
+        canvas.drawCircle(x_point, y_point, pointRadius + UIUtil.dp2pxF(1f), circlePaint);
+        //用折线颜色在拐点处画空心圆
+        circlePaint.setStyle(Paint.Style.STROKE);
+        circlePaint.setColor(colorBrokenLinePaint);
+        canvas.drawCircle(x_point, y_point, pointRadius, circlePaint);
+
+        //画虚线
+        circlePaint.setColor(0xFF999999);
+        //f数组两个值分别为循环的实线长度、空白长度
+        float[] f = {UIUtil.dp2pxF(5f), UIUtil.dp2pxF(2f)};
+        PathEffect pathEffect = new DashPathEffect(f, 0);
+        circlePaint.setPathEffect(pathEffect);
+
+        canvas.drawLine(x_point,y_point+UIUtil.dp2pxF(pointRadius+0.5f),x_point,viewHeight-itemWidth,circlePaint);
+
+        canvas.restore();
     }
 
     /**

@@ -29,18 +29,18 @@ public class WaterMeterActivity extends AppCompatActivity {
 
     private void initData() {
         list=new ArrayList<>();
-        list.add(new WaterAndElectricMeterDetail("","333","29","","1","2677","",""));
-        list.add(new WaterAndElectricMeterDetail("","333","10","","2","2687","",""));
-        list.add(new WaterAndElectricMeterDetail("","333","15","","3","2702","",""));
-        list.add(new WaterAndElectricMeterDetail("","333","20","","4","2727","",""));
-        list.add(new WaterAndElectricMeterDetail("","333","25","","5","2727","",""));
-        list.add(new WaterAndElectricMeterDetail("","333","15","","6","2727","",""));
-        list.add(new WaterAndElectricMeterDetail("","333","10","","7","2727","",""));
-        list.add(new WaterAndElectricMeterDetail("","333","20","","8","2727","",""));
-        list.add(new WaterAndElectricMeterDetail("","333","23","","9","2727","",""));
-        list.add(new WaterAndElectricMeterDetail("","333","26","","10","2727","",""));
-        list.add(new WaterAndElectricMeterDetail("","333","18","","11","2727","",""));
-        list.add(new WaterAndElectricMeterDetail("","333","16","","12","2727","",""));
+        list.add(new WaterAndElectricMeterDetail("333","29","1","2677","2020"));
+        list.add(new WaterAndElectricMeterDetail("333","15","1","2677","2020"));
+        list.add(new WaterAndElectricMeterDetail("333","25","1","2677","2020"));
+        list.add(new WaterAndElectricMeterDetail("333","23","1","2677","2020"));
+        list.add(new WaterAndElectricMeterDetail("333","20","1","2677","2020"));
+        list.add(new WaterAndElectricMeterDetail("333","18","1","2677","2020"));
+        list.add(new WaterAndElectricMeterDetail("333","16","1","2677","2020"));
+        list.add(new WaterAndElectricMeterDetail("333","25","1","2677","2020"));
+        list.add(new WaterAndElectricMeterDetail("333","24","1","2677","2020"));
+        list.add(new WaterAndElectricMeterDetail("333","16","1","2677","2020"));
+        list.add(new WaterAndElectricMeterDetail("333","12","1","2677","2020"));
+        list.add(new WaterAndElectricMeterDetail("333","24","1","2677","2020"));
         waterMeterView.setData(list);
     }
 }

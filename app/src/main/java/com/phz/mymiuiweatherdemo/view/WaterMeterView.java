@@ -240,7 +240,6 @@ public class WaterMeterView extends View {
         textPaintDetail= new Paint(Paint.ANTI_ALIAS_FLAG);
         textPaintDetail.setTextSize(textSizeDetail);
         textPaintDetail.setColor(backGroundColor);
-        textPaintDetail.setTextAlign(Paint.Align.CENTER);
 
         circlePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         coordinatePaint.setStrokeWidth(UIUtil.dp2pxF(0.5f));
@@ -390,7 +389,6 @@ public class WaterMeterView extends View {
             centerX=itemWidth+itemWidth*i;
             pointFList.add(new PointF(centerX,centerY));
         }
-
     }
 
     /**
@@ -453,21 +451,25 @@ public class WaterMeterView extends View {
         if (pointFSelected==null){
             return;
         }
-        rectF.left = screenWidth/2-UIUtil.dp2pxF(115)+getScrollX();
-        rectF.right =screenWidth/2+UIUtil.dp2pxF(115)+getScrollX();
-        rectF.top = UIUtil.dp2pxF(6);
-        rectF.bottom=UIUtil.dp2pxF(36);
+        rectF.left = pointFSelected.x+UIUtil.dp2pxF(12);
+        rectF.right =pointFSelected.x+UIUtil.dp2pxF(12)+UIUtil.dp2pxF(230);;
+        rectF.top = pointFSelected.y-UIUtil.dp2pxF(42);
+        rectF.bottom=pointFSelected.y-UIUtil.dp2pxF(12);
+
+        if (rectF.right>viewWidth){
+            //调整文字框位置
+            rectF.left = pointFSelected.x-UIUtil.dp2pxF(12)-UIUtil.dp2pxF(230);
+            rectF.right =pointFSelected.x-UIUtil.dp2pxF(12);
+        }
         WaterDetailBgPath.moveTo(rectF.left,rectF.top);
         WaterDetailBgPath.addRoundRect(rectF,UIUtil.dp2pxF(5),UIUtil.dp2pxF(5), Path.Direction.CW);
-
         //画背景
         canvas.drawPath(WaterDetailBgPath,backGroundDetailPaint);
-
         //写文字
         WaterAndElectricMeterDetail weData=list.get(pointFList.indexOf(pointFSelected));
         String text = "用量："+weData.getDosage()+"    "+"读数："+weData.getTotalReading()+"    "+"修正读数："+weData.getCorrection();
-        Paint.FontMetrics m = textPaint.getFontMetrics();
-        canvas.drawText(text, 0, text.length(), rectF.left+UIUtil.dp2pxF(115), UIUtil.dp2pxF(21) - (m.ascent + m.descent) / 2, textPaintDetail);
+        Paint.FontMetrics m = textPaintDetail.getFontMetrics();
+        canvas.drawText(text, 0, text.length(), rectF.left+UIUtil.dp2pxF(115), rectF.bottom-UIUtil.dp2pxF(15) - (m.ascent + m.descent) / 2, textPaintDetail);
 
         canvas.restore();
     }

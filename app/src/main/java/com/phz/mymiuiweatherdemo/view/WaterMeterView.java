@@ -240,6 +240,7 @@ public class WaterMeterView extends View {
         textPaintDetail= new Paint(Paint.ANTI_ALIAS_FLAG);
         textPaintDetail.setTextSize(textSizeDetail);
         textPaintDetail.setColor(backGroundColor);
+        textPaintDetail.setTextAlign(Paint.Align.LEFT);
 
         circlePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         coordinatePaint.setStrokeWidth(UIUtil.dp2pxF(0.5f));
@@ -452,25 +453,27 @@ public class WaterMeterView extends View {
             return;
         }
         rectF.left = pointFSelected.x+UIUtil.dp2pxF(12);
-        rectF.right =pointFSelected.x+UIUtil.dp2pxF(12)+UIUtil.dp2pxF(230);;
-        rectF.top = pointFSelected.y-UIUtil.dp2pxF(42);
+        rectF.right =pointFSelected.x+UIUtil.dp2pxF(12)+UIUtil.dp2pxF(130);;
+        rectF.top = pointFSelected.y-UIUtil.dp2pxF(52);
         rectF.bottom=pointFSelected.y-UIUtil.dp2pxF(12);
 
         if (rectF.right>viewWidth){
             //调整文字框位置
-            rectF.left = pointFSelected.x-UIUtil.dp2pxF(12)-UIUtil.dp2pxF(230);
+            rectF.left = pointFSelected.x-UIUtil.dp2pxF(12)-UIUtil.dp2pxF(130);
             rectF.right =pointFSelected.x-UIUtil.dp2pxF(12);
         }
         WaterDetailBgPath.moveTo(rectF.left,rectF.top);
         WaterDetailBgPath.addRoundRect(rectF,UIUtil.dp2pxF(5),UIUtil.dp2pxF(5), Path.Direction.CW);
         //画背景
         canvas.drawPath(WaterDetailBgPath,backGroundDetailPaint);
-        //写文字
+        //写第一行文字
         WaterAndElectricMeterDetail weData=list.get(pointFList.indexOf(pointFSelected));
-        String text = "用量："+weData.getDosage()+"    "+"读数："+weData.getTotalReading()+"    "+"修正读数："+weData.getCorrection();
+        String textO = "用量："+weData.getDosage()+"    "+"读数："+weData.getTotalReading();
+        String textT = "修正读数："+weData.getCorrection();
         Paint.FontMetrics m = textPaintDetail.getFontMetrics();
-        canvas.drawText(text, 0, text.length(), rectF.left+UIUtil.dp2pxF(115), rectF.bottom-UIUtil.dp2pxF(15) - (m.ascent + m.descent) / 2, textPaintDetail);
-
+        canvas.drawText(textO, 0, textO.length(), rectF.left+UIUtil.dp2pxF(8), rectF.bottom-UIUtil.dp2pxF(30) - (m.ascent + m.descent) / 2, textPaintDetail);
+        //写第二行文字
+        canvas.drawText(textT, 0, textT.length(), rectF.left+UIUtil.dp2pxF(8), rectF.bottom-UIUtil.dp2pxF(10) - (m.ascent + m.descent) / 2, textPaintDetail);
         canvas.restore();
     }
 

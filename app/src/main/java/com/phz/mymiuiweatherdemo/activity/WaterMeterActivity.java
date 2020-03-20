@@ -29,18 +29,18 @@ public class WaterMeterActivity extends AppCompatActivity {
 
     private void initData() {
         list=new ArrayList<>();
-        list.add(new WaterAndElectricMeterDetail("9999","29","1","2677","2020"));
-        list.add(new WaterAndElectricMeterDetail("9999","15","1","2677","2020"));
-        list.add(new WaterAndElectricMeterDetail("9999","25","1","2677","2020"));
-        list.add(new WaterAndElectricMeterDetail("9999","23","1","2677","2020"));
-        list.add(new WaterAndElectricMeterDetail("9999","20","1","2677","2020"));
-        list.add(new WaterAndElectricMeterDetail("9999","18","1","2677","2020"));
-        list.add(new WaterAndElectricMeterDetail("9999","16","1","2677","2020"));
-        list.add(new WaterAndElectricMeterDetail("9999","25","1","2677","2020"));
-        list.add(new WaterAndElectricMeterDetail("9999","24","1","2677","2020"));
-        list.add(new WaterAndElectricMeterDetail("9999","16","1","2677","2020"));
-        list.add(new WaterAndElectricMeterDetail("9999","12","1","2677","2020"));
-        list.add(new WaterAndElectricMeterDetail("9999","24","1","2677","2020"));
+        list.add(new WaterAndElectricMeterDetail("9999.00","29.00","1","2677.00.","2020"));
+        list.add(new WaterAndElectricMeterDetail("9999.00","15.00","1","2677.00.","2020"));
+        list.add(new WaterAndElectricMeterDetail("9999.00","25.00","1","2677.00.","2020"));
+        list.add(new WaterAndElectricMeterDetail("9999.00","23.00","1","2677.00.","2020"));
+        list.add(new WaterAndElectricMeterDetail("9999.00","20.00","1","2677.00.","2020"));
+        list.add(new WaterAndElectricMeterDetail("9999.00","18.00","1","2677.00.","2020"));
+        list.add(new WaterAndElectricMeterDetail("9999.00","16.00","1","2677.00.","2020"));
+        list.add(new WaterAndElectricMeterDetail("9999.00","25.00","1","2677.00.","2020"));
+        list.add(new WaterAndElectricMeterDetail("9999.00","24.00","1","2677.00.","2020"));
+        list.add(new WaterAndElectricMeterDetail("9999.00","16.00","1","2677.00.","2020"));
+        list.add(new WaterAndElectricMeterDetail("9999.00","12.00","1","2677.00.","2020"));
+        list.add(new WaterAndElectricMeterDetail("9999.00","24.00","1","2677.00.","2020"));
         waterMeterView.setData(list);
     }
 }

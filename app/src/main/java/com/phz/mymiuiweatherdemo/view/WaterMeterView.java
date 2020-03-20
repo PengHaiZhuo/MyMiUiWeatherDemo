@@ -94,6 +94,11 @@ public class WaterMeterView extends View {
     private int colorCoordinatePaint=0xFFEEEEEE;
 
     /**
+     * 详情文字背景颜色
+     */
+    private int colorDetailTextBg=0x66000000;
+
+    /**
      * 文字大小
      * 默认11sp
      */
@@ -246,7 +251,7 @@ public class WaterMeterView extends View {
         coordinatePaint.setStrokeWidth(UIUtil.dp2pxF(0.5f));
         backGroundPaint=new Paint(Paint.ANTI_ALIAS_FLAG);
         backGroundDetailPaint=new Paint(Paint.ANTI_ALIAS_FLAG);
-        backGroundDetailPaint.setColor(colorTextPaint);
+        backGroundDetailPaint.setColor(colorDetailTextBg);
         curvePath=new Path();
         WaterDetailBgPath=new Path();
         rectF=new RectF();
@@ -399,7 +404,8 @@ public class WaterMeterView extends View {
         int lastMaxTem = -Integer.MAX_VALUE;
         int lastMinTem = Integer.MAX_VALUE;
         for (WaterAndElectricMeterDetail bean : list) {
-            int dosage= Integer.parseInt(bean.getDosage());
+            double d_dosage=Double.valueOf(bean.getDosage());
+            int dosage= (int)d_dosage;
             if (dosage > lastMaxTem) {
                 maxDosage = dosage;
                 lastMaxTem = dosage;
@@ -452,14 +458,18 @@ public class WaterMeterView extends View {
         if (pointFSelected==null){
             return;
         }
+        WaterAndElectricMeterDetail weData=list.get(pointFList.indexOf(pointFSelected));
+        String textO = "用量："+weData.getDosage()+"    "+"读数："+weData.getTotalReading();
+        String textT = "修正读数："+weData.getCorrection();
+
         rectF.left = pointFSelected.x+UIUtil.dp2pxF(12);
-        rectF.right =pointFSelected.x+UIUtil.dp2pxF(12)+UIUtil.dp2pxF(130);;
+        rectF.right =pointFSelected.x+UIUtil.dp2pxF(12)+UIUtil.dp2pxF(126+textO.length());;
         rectF.top = pointFSelected.y-UIUtil.dp2pxF(52);
         rectF.bottom=pointFSelected.y-UIUtil.dp2pxF(12);
 
         if (rectF.right>viewWidth){
             //调整文字框位置
-            rectF.left = pointFSelected.x-UIUtil.dp2pxF(12)-UIUtil.dp2pxF(130);
+            rectF.left = pointFSelected.x-UIUtil.dp2pxF(12)-UIUtil.dp2pxF(126+textO.length());
             rectF.right =pointFSelected.x-UIUtil.dp2pxF(12);
         }
         WaterDetailBgPath.moveTo(rectF.left,rectF.top);
@@ -467,13 +477,10 @@ public class WaterMeterView extends View {
         //画背景
         canvas.drawPath(WaterDetailBgPath,backGroundDetailPaint);
         //写第一行文字
-        WaterAndElectricMeterDetail weData=list.get(pointFList.indexOf(pointFSelected));
-        String textO = "用量："+weData.getDosage()+"    "+"读数："+weData.getTotalReading();
-        String textT = "修正读数："+weData.getCorrection();
         Paint.FontMetrics m = textPaintDetail.getFontMetrics();
-        canvas.drawText(textO, 0, textO.length(), rectF.left+UIUtil.dp2pxF(8), rectF.bottom-UIUtil.dp2pxF(30) - (m.ascent + m.descent) / 2, textPaintDetail);
+        canvas.drawText(textO, 0, textO.length(), rectF.left+UIUtil.dp2pxF(8), rectF.bottom-UIUtil.dp2pxF(28) - (m.ascent + m.descent) / 2, textPaintDetail);
         //写第二行文字
-        canvas.drawText(textT, 0, textT.length(), rectF.left+UIUtil.dp2pxF(8), rectF.bottom-UIUtil.dp2pxF(10) - (m.ascent + m.descent) / 2, textPaintDetail);
+        canvas.drawText(textT, 0, textT.length(), rectF.left+UIUtil.dp2pxF(8), rectF.bottom-UIUtil.dp2pxF(12) - (m.ascent + m.descent) / 2, textPaintDetail);
         canvas.restore();
     }
 

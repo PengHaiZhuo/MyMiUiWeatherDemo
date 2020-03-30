@@ -6,7 +6,8 @@
     android:layout_height="match_parent"
     tools:context=".activity.MainActivity">
 
-    <com.phz.mymiuiweatherdemo.view.MiUiWeatherView        android:id="@+id/weather_view"
+    <com.phz.mymiuiweatherdemo.view.MiUiWeatherView
+        android:id="@+id/weather_view"
         android:layout_width="match_parent"
         android:layout_height="300dp"
         app:layout_constraintBottom_toBottomOf="parent"

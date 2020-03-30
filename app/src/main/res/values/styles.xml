@@ -6,6 +6,8 @@
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
+        <item name="colorButtonNormal">#fff</item> 未点击时颜色
+        <item name="colorControlHighlight">#D33A31</item> 点击时颜色
     </style>
 
 </resources>

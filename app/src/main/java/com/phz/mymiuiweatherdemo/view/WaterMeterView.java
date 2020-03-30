@@ -118,15 +118,14 @@ public class WaterMeterView extends View {
 
     /**
      *  itemWidth对应的用水量（吨）
-     *  默认为5
      */
-    private int unitYItem=5;
+    private int unitYItem;
 
     /**
      * Y方向有数据的Item个数
-     * 默认5个
+     * 默认4个
      */
-    private int itemYSize=5;
+    private static final int itemYSize=4;
 
     /**
      * 折线图左和下的间距，同横纵单位间隔
@@ -137,7 +136,7 @@ public class WaterMeterView extends View {
 
     /**
      * 控件期望高度
-     * 默认为7个itemWidth
+     * 默认为8个itemWidth
      */
     private int expectViewHeight;
 
@@ -224,12 +223,10 @@ public class WaterMeterView extends View {
         pointRadius=UIUtil.dp2pxF(2.5f);
         setBackgroundColor(backGroundColor);
         defaultPadding = itemWidth = (int)UIUtil.dp2pxF(42);
-        //期望高度默认值为7个itemWidth，（itemYSize默认值+2）
+        //期望高度默认值为7个itemWidth，（itemYSize默认值+1+2）
         expectViewHeight=itemWidth*(7);
         screenWidth = getResources().getDisplayMetrics().widthPixels;
         screenHeight = getResources().getDisplayMetrics().heightPixels;
-        //计算单位高度差
-        unitVerticalGap = (float) (itemWidth/unitYItem);
         //初始化画笔
         brokenLinePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         brokenLinePaint.setColor(colorBrokenLinePaint);
@@ -339,12 +336,12 @@ public class WaterMeterView extends View {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
         int heightSize = MeasureSpec.getSize(heightMeasureSpec);
         int heightMode = MeasureSpec.getMode(heightMeasureSpec);
-        //计算
-        calculateItemYSize();
+        expectViewHeight=(itemYSize+3)*itemWidth;
         if (heightMode == MeasureSpec.EXACTLY) {
             //特定大小，不管他多大
             viewHeight = Math.max(heightSize, expectViewHeight);
-        } else {
+        }
+        else {
             viewHeight = expectViewHeight;
         }
 
@@ -352,16 +349,15 @@ public class WaterMeterView extends View {
         int totalWidth;
         totalWidth=itemWidth*13;
         viewWidth = Math.max(screenWidth, totalWidth);
-
-        //获取数据点集
-        initPointFData();
     }
 
     @Override
     protected void onSizeChanged(int width, int height, int oldWidth, int oldHeight) {
         super.onSizeChanged(width, height, oldWidth, oldHeight);
-        initDistance();
-        calculateItemYSize();
+        screenWidth = getResources().getDisplayMetrics().widthPixels;
+        screenHeight = getResources().getDisplayMetrics().heightPixels;
+        defaultPadding = itemWidth = (int)UIUtil.dp2pxF(42);
+        calculateGap();
         initPointFData();
     }
 
@@ -378,6 +374,7 @@ public class WaterMeterView extends View {
         pointFSelected=null;
 
         this.list = data;
+        calculateGap();
         initPointFData();
         invalidate();
     }
@@ -398,41 +395,30 @@ public class WaterMeterView extends View {
     }
 
     /**
-     * 计算Y方向有数据item有几个
+     * 计算单位高度差
      */
-    private void calculateItemYSize() {
-        int lastMaxTem = -Integer.MAX_VALUE;
-        int lastMinTem = Integer.MAX_VALUE;
-        for (WaterAndElectricMeterDetail bean : list) {
-            double d_dosage=Double.valueOf(bean.getDosage());
-            int dosage= (int)d_dosage;
-            if (dosage > lastMaxTem) {
-                maxDosage = dosage;
-                lastMaxTem = dosage;
-            }
-            if (dosage < lastMinTem) {
-                minDosage = dosage;
-                lastMinTem = dosage;
-            }
-            itemYSize= (int) (Math.floor(Double.valueOf(maxDosage+"")/Double.valueOf(unitYItem+""))+1.00);
-            if (itemYSize<=5){
-                expectViewHeight=itemWidth*(7);
-            }else {
-                expectViewHeight=itemWidth*(itemYSize+2);
-            }
+    private void calculateGap(){
+        if (list.isEmpty()){
+            return;
         }
+        //先计算unitYItem
+        float lastMaxTem = -1f;
+        float lastMinTem = 99999f;
+        for (WaterAndElectricMeterDetail bean : list) {
+            float d_dosage=Float.valueOf(bean.getDosage());
+            if (d_dosage > lastMaxTem) {
+                maxDosage = d_dosage;
+                lastMaxTem = d_dosage;
+            }
+            if (d_dosage < lastMinTem) {
+                minDosage = d_dosage;
+                lastMinTem = d_dosage;
+            }
+            unitYItem= (int) Math.ceil(maxDosage/4);
+        }
+        //计算单位高度差
+        unitVerticalGap =((float)itemWidth/(float) unitYItem);
     }
-
-    /**
-     * 初始化一些距离
-     */
-    private void initDistance() {
-        screenWidth = getResources().getDisplayMetrics().widthPixels;
-        screenHeight = getResources().getDisplayMetrics().heightPixels;
-
-        defaultPadding = itemWidth = (int)UIUtil.dp2pxF(42);
-    }
-
 
     @Override
     protected void onDraw(Canvas canvas) {
@@ -463,13 +449,14 @@ public class WaterMeterView extends View {
         String textT = "修正读数："+weData.getCorrection();
 
         rectF.left = pointFSelected.x+UIUtil.dp2pxF(12);
-        rectF.right =pointFSelected.x+UIUtil.dp2pxF(12)+UIUtil.dp2pxF(126+textO.length());;
+        //88dp是当text0，没有读数的时候，默认的长度。
+        rectF.right =pointFSelected.x+UIUtil.dp2pxF(12)+UIUtil.dp2pxF(88)+UIUtil.getTextWidth(textPaintDetail,weData.getDosage())+UIUtil.getTextWidth(textPaintDetail,weData.getTotalReading());
         rectF.top = pointFSelected.y-UIUtil.dp2pxF(52);
         rectF.bottom=pointFSelected.y-UIUtil.dp2pxF(12);
 
         if (rectF.right>viewWidth){
             //调整文字框位置
-            rectF.left = pointFSelected.x-UIUtil.dp2pxF(12)-UIUtil.dp2pxF(126+textO.length());
+            rectF.left = pointFSelected.x-UIUtil.dp2pxF(12)-UIUtil.dp2pxF(88)-UIUtil.getTextWidth(textPaintDetail,weData.getDosage())-UIUtil.getTextWidth(textPaintDetail,weData.getTotalReading());
             rectF.right =pointFSelected.x-UIUtil.dp2pxF(12);
         }
         WaterDetailBgPath.moveTo(rectF.left,rectF.top);
@@ -521,7 +508,7 @@ public class WaterMeterView extends View {
      * 画渐变蓝色背景
      */
     private void drawBackBlue(Canvas canvas) {
-        if (list.isEmpty()||pointFList.isEmpty()){
+        if (pointFList.isEmpty()){
             return;
         }
         canvas.save();
@@ -549,7 +536,7 @@ public class WaterMeterView extends View {
      * 画曲线
      */
     private void drawCurve(Canvas canvas) {
-        if (list.isEmpty()||pointFList.isEmpty()){
+        if (pointFList.isEmpty()){
             return;
         }
         canvas.save();
@@ -575,7 +562,7 @@ public class WaterMeterView extends View {
     private void drawAxis(Canvas canvas) {
         canvas.save();
         //画横轴
-        for (int i = 0; i <itemYSize+1; i++) {
+        for (int i = 0; i <itemYSize+2; i++) {
             canvas.drawLine(itemWidth, viewHeight - itemWidth-i*itemWidth,
                     viewWidth-UIUtil.dp2px(10), viewHeight - itemWidth-i*itemWidth, coordinatePaint);
         }
@@ -595,11 +582,13 @@ public class WaterMeterView extends View {
         //写用量
         float centerXNew=itemWidth/2;
         float centerYNew;
-        for (int i = 0; i <itemYSize+1 ; i++) {
-            String text = i*unitYItem+"";
-            centerYNew = viewHeight-(defaultPadding + i * itemWidth);
-            Paint.FontMetrics m = textPaint.getFontMetrics();
-            canvas.drawText(text, 0, text.length(), centerXNew, centerYNew - (m.ascent + m.descent) / 2, textPaint);
+        if (!pointFList.isEmpty()){
+            for (int i = 0; i <itemYSize+2 ; i++) {
+                String text = i*unitYItem+"";
+                centerYNew = viewHeight-(defaultPadding + i * itemWidth);
+                Paint.FontMetrics m = textPaint.getFontMetrics();
+                canvas.drawText(text, 0, text.length(), centerXNew, centerYNew - (m.ascent + m.descent) / 2, textPaint);
+            }
         }
 
         String string= MyApplication.getInstance().getResources().getString(R.string.dosage);

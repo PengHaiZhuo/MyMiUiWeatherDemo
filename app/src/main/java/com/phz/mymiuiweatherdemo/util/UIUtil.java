@@ -31,6 +31,7 @@ import androidx.annotation.DimenRes;
 public class UIUtil {
     private UIUtil() {
     }
+
     /**
      * 根据手机的分辨率从 dp 的单位 转成为 px(像素)
      */
@@ -51,8 +52,7 @@ public class UIUtil {
      * 将sp值转换为px值，保证文字大小不变
      *
      * @param spValue
-     * @param spValue
-     *            （DisplayMetrics类中属性scaledDensity）
+     * @param spValue （DisplayMetrics类中属性scaledDensity）
      * @return
      */
     public static int sp2px(Context context, float spValue) {
@@ -71,7 +71,7 @@ public class UIUtil {
      * dp转pxF
      */
     public static float dp2pxF(float dpValue) {
-        return  TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dpValue, MyApplication.getInstance().getResources().getDisplayMetrics());
+        return TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dpValue, MyApplication.getInstance().getResources().getDisplayMetrics());
     }
 
     /**
@@ -84,7 +84,6 @@ public class UIUtil {
 
     /**
      * px转dp
-     *
      */
     public static float px2dp(float pxVal) {
         final float scale = MyApplication.getInstance().getResources().getDisplayMetrics().density;
@@ -100,6 +99,7 @@ public class UIUtil {
 
     /**
      * 获取导航栏高度
+     *
      * @return
      */
     public static int getStatusBarHeight() {
@@ -259,5 +259,25 @@ public class UIUtil {
             display.getMetrics(displayMetrics);
         }
         return displayMetrics.widthPixels;
+    }
+
+    /**
+     * 精确计算文字宽度
+     *
+     * @param paint
+     * @param str
+     * @return 文字长度，像素
+     */
+    public static int getTextWidth(Paint paint, String str) {
+        int iRet = 0;
+        if (str != null && str.length() > 0) {
+            int len = str.length();
+            float[] widths = new float[len];
+            paint.getTextWidths(str, widths);
+            for (int j = 0; j < len; j++) {
+                iRet += (int) Math.ceil(widths[j]);
+            }
+        }
+        return iRet;
     }
 }

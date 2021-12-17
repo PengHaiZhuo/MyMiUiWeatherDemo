@@ -1,8 +1,17 @@
 # MyMiUiWeatherDemo
 自定义View学习，仿小米天气。
 
-![image](https://github.com/PengHaiZhuo/hello-world/blob/master/picture/my_mi_weather_view.png)
+<p align="center">
+	<img src="screenshots/my_mi_weather_view.png" alt="小米天气"  width="240" height="240">
+	<p align="center">
+		<em>demo截图</em>
+	</p>
+</p>
 
-根据自己需求做的年度水表图
 
-![image](https://github.com/PengHaiZhuo/hello-world/blob/master/picture/water_meter_dosage_view.png)
+<p align="center">
+	<img src="screenshots/water_meter_dosage_view.png" alt="年度水表图"  width="240" height="240">
+	<p align="center">
+		<em>demo截图</em>
+	</p>
+</p>
